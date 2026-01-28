@@ -99,7 +99,7 @@ class TenantScope implements Scope
 
 ### No Manager (painel administrativo)
 
-- Resolvido via **subdomínio** ou **header de autenticação** (`X-Enterprise-ID`)
+- Resolvido via **subdomínio**
 - Gerenciado pelo middleware `ResolveTenant`
 
 ### No Tracker (clique)

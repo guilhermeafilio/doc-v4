@@ -12,7 +12,7 @@ Optamos pela estratégia de **Monorepo** para garantir a integridade do modelo d
 
 ## Organização do código
 
-Para evitar que o “Monolito” se torne confuso, o projeto segue o padrão de **DDD** ou **Modules**, separando claramente:
+Para evitar que o “Monolito” se torne confuso, o projeto segue o padrão de **DDD**, separando claramente:
 
 - `app/Core`: Lógica compartilhada e Models.
 - `app/Http/Controllers/Tracker`: Endpoints de alta performance.

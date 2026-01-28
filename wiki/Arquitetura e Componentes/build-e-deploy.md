@@ -1,7 +1,5 @@
 # Estratégia de Build e Deployment
 
-Origem: `build-deploy.md`.
-
 A solução utiliza uma abordagem de **Imagem Única (Single Source of Truth)** com **Segmentação de Serviços**.
 
 ## O artefato (Docker image)
@@ -9,7 +7,7 @@ A solução utiliza uma abordagem de **Imagem Única (Single Source of Truth)** 
 Uma única imagem Docker é gerada no pipeline de CI/CD e enviada para o **Amazon ECR**. Esta imagem contém:
 
 - Código fonte completo (Monorepo).
-- Extensões PHP necessárias para FPM e Octane (Swoole/RoadRunner).
+- Extensões PHP necessárias para FPM e Octane (Swoole), PHP CLI.
 - Binários do Nginx e dependências de runtime.
 
 ## Separação de instâncias no EKS

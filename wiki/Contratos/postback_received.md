@@ -11,7 +11,7 @@ Emitido quando a plataforma recebe um postback de conversão do anunciante.
 - **Produtor**: Receiver (AWS Lambda)
 - **Consumidor**: Worker (via SQS) para validação, criação/atualização de conversão e cálculo de comissões
 
-## Payload (exemplo)
+## Payload (contrato)
 
 ```json
 {

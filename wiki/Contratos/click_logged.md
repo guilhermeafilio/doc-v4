@@ -11,7 +11,7 @@ Emitido quando um clique é registrado (Tracker).
 - **Produtor**: Tracker (Laravel/Octane)
 - **Consumidor**: processamento assíncrono (fila/job) e persistência/analytics (conforme arquitetura)
 
-## Payload (exemplo)
+## Payload (contrato)
 
 ```json
 {
