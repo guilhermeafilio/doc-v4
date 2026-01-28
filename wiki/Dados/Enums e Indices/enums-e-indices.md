@@ -8,18 +8,17 @@ Os campos abaixo utilizam representação numérica para otimização de armazen
 
 ### CONVERSIONS (status)
 
-> Nota: o documento original tem IDs duplicados/inconsistentes. Mantivemos o conteúdo como referência e recomenda-se revisar/normalizar o enum antes de usar como contrato.
 
 | ID | Valor | Descrição |
 |:---|:---|:---|
 | 1 | `RECEIVED` | Recebido do anunciante/importado. |
 | 2 | `PENDING` | Aguardando processamento/validação. |
-| 2 | `APPROVED` | Conversão validada com sucesso. |
-| 3 | `READY_TO_PAY` | Pronto para ser pago. |
-| 4 | `PAID` | Comissão já paga ao beneficiário. |
-| 5 | `REJECTED` | Conversão negada (regras de negócio ou fraude). |
-| 6 | `CANCELLED` | Cancelada pelo cliente final. |
-| 7 | `CHARGEBACK` | Revertido depois de pago. |
+| 3 | `APPROVED` | Conversão validada com sucesso. |
+| 4 | `READY_TO_PAY` | Pronto para ser pago. |
+| 5 | `PAID` | Comissão já paga ao beneficiário. |
+| 6 | `REJECTED` | Conversão negada (regras de negócio ou fraude). |
+| 7 | `CANCELLED` | Cancelada pelo cliente final. |
+| 8 | `CHARGEBACK` | Revertido depois de pago. |
 
 ---
 

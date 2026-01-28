@@ -1,15 +1,7 @@
 # Home
 
-Esta Wiki centraliza a documentação técnica do **V4** (arquitetura, fluxos, contratos e dados).
+Esta Wiki centraliza a documentação técnica do **V4** (arquitetura, fluxos, contratos e dados). Baseado no estudo feito a partir da V3.
 
-## Comece por aqui
-
-- [Arquitetura e Componentes](./Arquitetura%20e%20Componentes/)
-- [Fluxos](./Fluxos/)
-- [Contratos](./Contratos/)
-- [Dados](./Dados/)
-
-## Mapa rápido
 
 ### Arquitetura
 - [Monorepo modular](./Arquitetura%20e%20Componentes/monorepo-modular.md)
