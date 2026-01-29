@@ -53,7 +53,7 @@ Objetivo: tornar **obrigatório** um healthcheck consistente em todas as apps pa
     - Ser **extremamente leve e rápida** (sem relatórios, sem queries pesadas).
     - Opcionalmente fazer checks mínimos de dependências críticas:
       - Tracker: ping rápido no Redis.
-      - Worker: checar se o processo principal/Horizon está rodando.
+      - Worker: usar `exec` probe com `php artisan horizon:status` (processo CLI não expõe HTTP).
       - Manager: ping leve no RDS (ex.: `SELECT 1`).
 
 - **Liveness x Readiness (resumo)**
@@ -81,7 +81,28 @@ Route::get('/health', function () {
 });
 ```
 
-> Observação: para o Tracker você pode trocar o check de DB por um ping simples no Redis; para o Worker, pode ser um check leve de processo/queue, desde que seja rápido.
+> Observação: para o Tracker você pode trocar o check de DB por um ping simples no Redis; para o Manager, usar o check de DB como mostrado acima.
+
+- **Worker (Horizon) - processo CLI**
+
+Como o Worker roda `php artisan horizon` (processo CLI sem servidor HTTP), o healthcheck usa **`exec` probe** em vez de `httpGet`:
+
+```bash
+# O comando do Horizon retorna código de saída 0 se estiver rodando
+php artisan horizon:status
+```
+
+Ou, alternativamente, verificar se o processo principal está vivo:
+
+```bash
+# Verifica se o processo PHP do Horizon está rodando
+pgrep -f "artisan horizon" > /dev/null
+```
+
+- **Manager (Nginx + PHP-FPM) - onde entra o FPM**
+
+No papel **Manager**, quem “atende HTTP” é o **Nginx** (porta 80/443). O Nginx repassa as requests PHP para o **PHP-FPM** (normalmente na porta 9000, dentro do pod).
+Por isso, o healthcheck recomendado é **HTTP no Nginx** (ex.: `GET /health`), pois valida o caminho completo **Nginx → FPM → Laravel** (e ainda pode checar RDS).
 
 ## Exemplo de deployment (mesma imagem, papéis diferentes)
 
@@ -137,4 +158,64 @@ spec:
           limits:
             cpu: "500m"
             memory: "1Gi"
+        livenessProbe:
+          exec:
+            command:
+            - php
+            - artisan
+            - horizon:status
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - php
+            - artisan
+            - horizon:status
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+---
+
+# Deployment do MANAGER (Nginx + FPM)
+# Observação: probe HTTP deve apontar para a porta do Nginx (80), e o /health deve bater no Laravel via FPM.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-manager
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        image: v4/laravel-app:latest
+        # Exemplo ilustrativo: o Manager normalmente sobe Nginx+FPM no mesmo pod/imagem.
+        # Ajuste o command/ports conforme sua imagem/entrypoint.
+        command: ["php-fpm"]
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
 ```
