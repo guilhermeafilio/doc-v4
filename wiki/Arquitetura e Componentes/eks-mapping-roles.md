@@ -2,11 +2,22 @@
 
 Origem: `eks-mapping.md`.
 
-Estratégia de segmentação da aplicação Laravel no cluster EKS usando **Single Image, Multiple Roles**: uma única imagem Docker (ECR) assume diferentes funções baseada no comando de inicialização.
+Estratégia de segmentação da aplicação Laravel no cluster EKS usando **Single Image, Multiple Roles**: uma única imagem Docker em **repositório privado (ECR)** assume diferentes funções baseada no comando de inicialização.
 
 ## Arquitetura de execução
 
 A aplicação é dividida em três camadas para isolamento de falhas, escalabilidade independente e performance.
+
+### Imagens Docker (repositório privado)
+
+- Todas as imagens usadas pelos papéis (`Tracker`, `Worker`, `Manager`) são construídas e publicadas em um **repositório privado no Amazon ECR**.
+- Os exemplos de `image:` nos manifests usam um nome genérico, mas em produção deve ser algo no formato:
+
+  ```text
+  <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/v4/laravel-app:<tag>
+  ```
+
+- O acesso a essas imagens é feito via credenciais/IAM do cluster (IRSA ou role dos nodes), **não são imagens públicas**.
 
 ### Papel: TRACKER (motor de cliques)
 
@@ -117,7 +128,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: v4/laravel-app:latest
+        image: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/v4/laravel-app:latest
         command: ["php", "artisan", "octane:start", "--host=0.0.0.0"]
         resources:
           limits:
@@ -152,7 +163,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: v4/laravel-app:latest
+        image: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/v4/laravel-app:latest
         command: ["php", "artisan", "horizon"]
         resources:
           limits:
@@ -192,9 +203,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: v4/laravel-app:latest
-        # Exemplo ilustrativo: o Manager normalmente sobe Nginx+FPM no mesmo pod/imagem.
-        # Ajuste o command/ports conforme sua imagem/entrypoint.
+        image: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/v4/laravel-app:latest
         command: ["php-fpm"]
         ports:
         - containerPort: 80
