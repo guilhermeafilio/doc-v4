@@ -12,9 +12,11 @@ Optamos pela estratégia de **Monorepo** para garantir a integridade do modelo d
 
 ## Organização do código
 
-Para evitar que o “Monolito” se torne confuso, o projeto segue o padrão de **DDD**, separando claramente:
+Para evitar que o “Monolito” se torne confuso, o projeto segue o padrão de **DDD** (e estrutura tipo Clean/Hexagonal: Domain, Application, Infrastructure, Interfaces), separando claramente:
 
 - `app/Core`: Lógica compartilhada e Models.
 - `app/Http/Controllers/Tracker`: Endpoints de alta performance.
 - `app/Http/Controllers/Manager`: Endpoints do dashboard.
 - `app/Jobs`: Processamentos assíncronos (match de conversão).
+
+Para uma defesa articulada de por que esta arquitetura **não é um monolito problemático** (estrutura de pastas + Single Image Multiple Roles no EKS), ver [Por que esta arquitetura não é um monolito problemático](arquitetura-modular-nao-monolitica.md).

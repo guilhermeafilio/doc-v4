@@ -34,6 +34,7 @@ A aplicação é dividida em três camadas para isolamento de falhas, escalabili
 - **Gargalo crítico:** conexões RDS e CPU para cálculos
 - **Escalabilidade:** HPA baseado no **tamanho da fila SQS** (queue backlog)
 - **Fluxo:** consome SQS -> valida ClickID -> calcula comissões -> persiste no RDS (conversions)
+- **Deployments no EKS:** existem **dois** Deployments de worker (decisão híbrida): **deploy-worker** (pool base: filas track + conversion, env `HORIZON_ENV=default`) e **deploy-worker-track** (só fila track, env `HORIZON_ENV=track`, para escalar em pico de cliques — Black Friday, etc.). Detalhes em [Divisão de Workers por Fila](./worker-divisao-filas.md).
 
 ### Papel: MANAGER (painel administrativo)
 
@@ -153,7 +154,7 @@ spec:
 
 ---
 
-# Deployment do WORKER
+# Deployment do WORKER (pool base: track + conversion)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -165,6 +166,52 @@ spec:
       - name: app
         image: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/v4/laravel-app:latest
         command: ["php", "artisan", "horizon"]
+        env:
+        - name: HORIZON_ENV
+          value: "default"
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        livenessProbe:
+          exec:
+            command:
+            - php
+            - artisan
+            - horizon:status
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - php
+            - artisan
+            - horizon:status
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+---
+
+# Deployment do WORKER TRACK (só fila track; escalar em pico — Black Friday, etc.)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-worker-track
+spec:
+  replicas: 0   # ou 1; HPA pode subir conforme backlog da fila track
+  template:
+    spec:
+      containers:
+      - name: app
+        image: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/v4/laravel-app:latest
+        command: ["php", "artisan", "horizon"]
+        env:
+        - name: HORIZON_ENV
+          value: "track"
         resources:
           limits:
             cpu: "500m"
