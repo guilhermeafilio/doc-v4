@@ -1,6 +1,7 @@
 # ERD (Rodrigo)
 
 Origem: `ERD-Rodrigo.mmd`.
+Arquivo original (Oficial): https://drive.google.com/file/d/1YVhr-P_IueMGotAaoF6QjXEPuqmGqqe4/view
 
 > Observação: este ERD descreve entidades e relacionamentos (formato Mermaid ER diagram).
 
