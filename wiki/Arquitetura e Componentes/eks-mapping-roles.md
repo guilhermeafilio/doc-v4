@@ -42,6 +42,47 @@ A aplicação é dividida em três camadas para isolamento de falhas, escalabili
 | **Escrita SQS** | Alta | Baixa | Baixa | Crítica |
 | **Consumo SQS** | Nenhum | Crítico | Nenhum | Nenhum |
 
+## Healthcheck (liveness/readiness no EKS)
+
+Objetivo: tornar **obrigatório** um healthcheck consistente em todas as apps para o Kubernetes usar nas probes de **liveness** e **readiness**, permitindo que o SRE use o `/health` como ponto de restauração e combine isso com HPA sem indisponibilidade.
+
+- **Contrato de rota na aplicação**
+  - Toda app deve expor `GET /health`.
+  - A rota deve:
+    - Retornar **HTTP 200** quando o processo está saudável.
+    - Ser **extremamente leve e rápida** (sem relatórios, sem queries pesadas).
+    - Opcionalmente fazer checks mínimos de dependências críticas:
+      - Tracker: ping rápido no Redis.
+      - Worker: checar se o processo principal/Horizon está rodando.
+      - Manager: ping leve no RDS (ex.: `SELECT 1`).
+
+- **Liveness x Readiness (resumo)**
+  - **Liveness probe**: responde se o pod **ainda está vivo**.
+    - Se falhar repetidas vezes, o Kubernetes **mata o pod e recria**.
+  - **Readiness probe**: responde se o pod **pode receber tráfego agora**.
+    - Se falhar, o Kubernetes **tira o pod do Service** (não recebe tráfego), mas o pod continua rodando.
+
+- **Exemplo de implementação do `/health` no Laravel**
+
+```php
+// routes/api.php (ou web.php, conforme padrão do serviço)
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+
+Route::get('/health', function () {
+    // Check mínimo e rápido (opcional, ajustar por papel)
+    try {
+        DB::select('SELECT 1'); // Manager pode usar isso para validar conexão com RDS
+    } catch (\Throwable $e) {
+        return response()->json(['status' => 'error'], 500);
+    }
+
+    return response()->json(['status' => 'ok'], 200);
+});
+```
+
+> Observação: para o Tracker você pode trocar o check de DB por um ping simples no Redis; para o Worker, pode ser um check leve de processo/queue, desde que seja rápido.
+
 ## Exemplo de deployment (mesma imagem, papéis diferentes)
 
 ```yaml
@@ -61,6 +102,22 @@ spec:
           limits:
             cpu: "1"
             memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
 
 ---
 
