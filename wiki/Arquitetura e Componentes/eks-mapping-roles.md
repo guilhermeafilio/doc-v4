@@ -1,7 +1,5 @@
 # Definição de Papéis e Runtime (EKS Mapping)
 
-Origem: `eks-mapping.md`.
-
 Estratégia de segmentação da aplicação Laravel no cluster EKS usando **Single Image, Multiple Roles**: uma única imagem Docker em **repositório privado (ECR)** assume diferentes funções baseada no comando de inicialização.
 
 ## Arquitetura de execução

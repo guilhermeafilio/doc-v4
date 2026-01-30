@@ -437,22 +437,23 @@ RedirectLinkShortener_Error {
   Boolean Status
 }
 
+%% =====================================================
+%% CONVERSION
+%% =====================================================
+
 Conversion {
   UUID UniqueID PK
 
-  String ExternalOrderId UNIQUE
-  String ClickId UNIQUE
-
   UUID IdLinkShortener FK
+  UUID IdRedirectLinkShortener FK
 
   UUID IdCampaign FK
   UUID IdChannel FK
   UUID IdCreative FK
   UUID IdPerson FK
 
+  String ExternalOrderId
   String ConversionType
-
-  String Status
 
   Decimal GrossValue
   Decimal PlatformCommissionValue
@@ -469,27 +470,54 @@ Conversion {
   Date ClickTimestamp
   Date ConversionTimestamp
 
-  Date ApprovedTimestamp
-  Date ReadyToPayTimestamp
-  Date PaidTimestamp
-
   Date Create_Date
 }
+ConversionStatus {
+  UUID UniqueID PK
+  UUID IdConversion FK
+
+  String Status
+  Timestamp ChangedAt
+  String ChangedBy
+  String Reason
+
+  Boolean IsCurrent
+}
+
+Conversion_Error {
+  UUID UniqueID PK
+  UUID IdConversion FK
+
+  String Error
+  String RemoteAddress
+  String UserAgent
+
+  Date Create_Date
+  Boolean Status
+}
+
+%% =====================================================
+%% RELATIONSHIPS
+%% =====================================================
 
 LinkType ||--o{ LinkShortener : typed
+
 LinkShortener ||--o{ RedirectLinkShortener : generates
 RedirectLinkShortener ||--o{ RedirectLinkShortener_Error : logs
 
-LinkShortener ||--o{ Conversion : traced_by
 LinkShortener ||--o{ Link_Campaign_Channel_Creative_Associate : mapped
 Campaign ||--o{ Link_Campaign_Channel_Creative_Associate : has
 Channel ||--o{ Link_Campaign_Channel_Creative_Associate : uses
 Creative ||--o{ Link_Campaign_Channel_Creative_Associate : uses
 
+LinkShortener ||--o{ Conversion : traced_by
+RedirectLinkShortener ||--|| Conversion : originates
+
+Conversion ||--o{ ConversionStatus : has_history
+Conversion ||--o{ Conversion_Error : logs
+
 Campaign ||--o{ Conversion : generates
 Channel ||--o{ Conversion : generates
 Creative ||--o{ Conversion : generates
 Person ||--o{ Conversion : earns
-
-RedirectLinkShortener ||--|| Conversion : originates
 ```

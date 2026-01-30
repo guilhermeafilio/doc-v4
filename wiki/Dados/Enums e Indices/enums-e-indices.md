@@ -1,13 +1,12 @@
 # Enums e Índices (Banco de Dados)
 
-Origem: `tech-doc.md`.
-
 ## Mapeamento de Enums
 
 Os campos abaixo utilizam representação numérica para otimização de armazenamento e performance.
 
-### CONVERSIONS (status)
+### CONVERSION_STATUS (enum)
 
+Usado em: tabela **CONVERSION_STATUS** (campo `status`). Valores armazenados como número (1–8) no banco.
 
 | ID | Valor | Descrição |
 |:---|:---|:---|
@@ -47,7 +46,7 @@ Os campos abaixo utilizam representação numérica para otimização de armazen
 - **INDEX(`channel_id`, `campaign_id`)**: utilizado para análises de performance por canal dentro da campanha.
 - **INDEX(`campaign_id`, `clicked_at`)**: otimização para séries temporais de cliques por campanha.
 
-### Tabela: `CONVERSION`
+### Tabela: `Conversion`
 
 - **UNIQUE(`click_id`)**: garante uma única conversão por clique.
 - **UNIQUE(`external_order_id`)**: utilizado para deduplicação e conciliação com sistemas externos.
@@ -56,7 +55,7 @@ Os campos abaixo utilizam representação numérica para otimização de armazen
 - **INDEX(`channel_id`, `conversion_timestamp`)**: utilizado para análises de performance por canal.
 - **INDEX(`affiliate_id`, `conversion_timestamp`)**: utilizado para relatórios de ganhos e performance por afiliado.
 
-### Tabela: `CONVERSION_STATUS`
+### Tabela: `Conversion_Status` (histórico de status; ver enum CONVERSION_STATUS)
 
 - **INDEX(`conversion_id`)**: utilizado para recuperação rápida do histórico de status de uma conversão.
 - **INDEX(`status`)**: utilizado para consultas operacionais e filas de processamento por estado (pendente, aprovado, pago).

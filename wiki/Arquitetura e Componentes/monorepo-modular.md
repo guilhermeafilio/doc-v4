@@ -1,8 +1,6 @@
 # Estratégia de Código: Monorepo Modular
 
-Origem: `repository.md`.
-
-Optamos pela estratégia de **Monorepo** para garantir a integridade do modelo de dados (ERD) e evitar a duplicação de lógica de negócio.
+Opta-se pela estratégia de **Monorepo** para garantir a integridade do modelo de dados (ERD) e evitar a duplicação de lógica de negócio.
 
 ## Vantagens para a solução
 
@@ -16,7 +14,7 @@ Para evitar que o “Monolito” se torne confuso, o projeto segue o padrão de 
 
 - `app/Core`: Lógica compartilhada e Models.
 - `app/Http/Controllers/Tracker`: Endpoints de alta performance.
-- `app/Http/Controllers/Manager`: Endpoints do dashboard.
+- `app/Http/Controllers/Manager`: Endpoints do dashboard e cadastros.
 - `app/Jobs`: Processamentos assíncronos (match de conversão).
 
 Para uma defesa articulada de por que esta arquitetura **não é um monolito problemático** (estrutura de pastas + Single Image Multiple Roles no EKS), ver [Por que esta arquitetura não é um monolito problemático](arquitetura-modular-nao-monolitica.md).
