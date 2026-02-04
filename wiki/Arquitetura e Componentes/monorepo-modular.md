@@ -8,13 +8,24 @@ Opta-se pela estratégia de **Monorepo** para garantir a integridade do modelo d
 2. **Consistência de contratos:** Os Jobs de fila (SQS) compartilham as mesmas classes de eventos entre quem envia (Tracker) e quem recebe (Worker).
 3. **Eficiência de CI/CD:** Um único pipeline gera a imagem que serve a toda a infraestrutura AWS.
 
-## Organização do código
+## Organização do Código
 
-Para evitar que o “Monolito” se torne confuso, o projeto segue o padrão de **DDD** (e estrutura tipo Clean/Hexagonal: Domain, Application, Infrastructure, Interfaces), separando claramente:
+Para evitar que o “Monolito” se torne confuso, o projeto segue o padrão de **DDD** (e estrutura tipo Clean/Hexagonal: Domain, Application, Infrastructure, Interfaces).
 
-- `app/Core`: Lógica compartilhada e Models.
-- `app/Http/Controllers/Tracker`: Endpoints de alta performance.
-- `app/Http/Controllers/Manager`: Endpoints do dashboard e cadastros.
-- `app/Jobs`: Processamentos assíncronos (match de conversão).
+A estrutura de pastas é organizada da seguinte forma:
 
-Para uma defesa articulada de por que esta arquitetura **não é um monolito problemático** (estrutura de pastas + Single Image Multiple Roles no EKS), ver [Por que esta arquitetura não é um monolito problemático](arquitetura-modular-nao-monolitica.md).
+```
+monorepo-root/
+├── domain/          # Lógica de negócio principal
+├── application/     # Casos de uso e orquestração
+├── infrastructure/  # Implementações concretas (DB, API, etc.)
+├── interfaces/      # Adapters e comunicação externa
+└── ...
+```
+
+Cada pasta representa uma camada do DDD, com responsabilidades bem definidas.
+
+- **domain**: Contém as entidades, value objects, e regras de negócio.
+- **application**: Define os casos de uso da aplicação, utilizando a lógica do domínio.
+- **infrastructure**: Implementa as abstrações definidas nas camadas superiores, como acesso ao banco de dados e comunicação com serviços externos.
+- **interfaces**: Expõe a aplicação através de APIs, interfaces de usuário, ou outros meios.
